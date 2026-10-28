@@ -2,12 +2,15 @@ name: ai-labs
 services:
   auth:
     build: ./auth
+    environment:
+      WORKSHOP_AUTH_TOKEN_SECRET: ${WORKSHOP_AUTH_TOKEN_SECRET:?Define WORKSHOP_AUTH_TOKEN_SECRET}
     ports:
       - "127.0.0.1:8080:8080"
   api:
     build: ./api
     environment:
       AUTH_HEALTH_URL: http://auth:8080/q/health
+      WORKSHOP_AUTH_TOKEN_SECRET: ${WORKSHOP_AUTH_TOKEN_SECRET:?Define WORKSHOP_AUTH_TOKEN_SECRET}
       WORKSHOP_DB_PATH: /data/workshop.db
       WORKSHOP_UPLOAD_DIR: /uploads
     volumes:

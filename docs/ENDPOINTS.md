@@ -142,7 +142,8 @@ Ejemplo completo de la forma de la respuesta. El valor de `token` es un marcador
 
 - La búsqueda de credenciales usa `PreparedStatement` y enlaza username y password como parámetros.
 - Las contraseñas de los registros sembrados se almacenan en texto plano en SQLite; este endpoint compara la contraseña recibida directamente con ese valor.
-- El token se codifica en Base64 con una cadena que contiene un secreto embebido. Base64 no firma ni autentica el contenido. Aunque se incluye una marca de expiración y se devuelve `expiresIn: 3600`, el código de `auth/` no verifica ni hace cumplir la expiración de tokens.
+- El token es un JWT firmado con HMAC-SHA256 (`HS256`). Incluye `username`, `role`, `iat` y `exp`; la expiración se fija en 3600 segundos y se devuelve como `expiresIn: 3600`. El secreto de firma se lee de `WORKSHOP_AUTH_TOKEN_SECRET`; el servicio no arranca si falta.
+- La verificación de `auth/` y de la API rechaza tokens sin firma válida, alterados, expirados o con el formato Base64 heredado.
 - El error `401` refleja el username recibido en su mensaje. El error `500` puede exponer el mensaje de excepción y el nombre de su clase.
 - La autenticación no depende del campo `client`.
 
@@ -151,6 +152,6 @@ Ejemplo completo de la forma de la respuesta. El valor de `token` es un marcador
 - Ruta, validación, estados y cuerpo de respuesta: `auth/src/main/java/com/bcp/workshop/auth/AuthResource.java:15-57`.
 - Campos del request: `auth/src/main/java/com/bcp/workshop/auth/LoginRequest.java:3-6`.
 - Consulta parametrizada, registros SQLite y captura de errores: `auth/src/main/java/com/bcp/workshop/auth/LegacyDatabase.java:17-49`.
-- Construcción del token heredado: `auth/src/main/java/com/bcp/workshop/auth/LegacyTokenUtil.java:8-15`.
+- Emisión del token firmado: `auth/src/main/java/com/bcp/workshop/auth/TokenSigner.java:16-37`; uso en la respuesta: `auth/src/main/java/com/bcp/workshop/auth/AuthResource.java:42-45`.
 - Endpoint de salud: dependencia `quarkus-smallrye-health` en `auth/pom.xml:40`; URL de referencia en `README.md`.
 - Verificación local de salud, respuestas de login y errores del framework: realizada contra `127.0.0.1:8080`; el token de la respuesta se omitió de la salida.
